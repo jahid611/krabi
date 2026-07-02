@@ -1,0 +1,23 @@
+{
+  "name": "krabi",
+  "private": true,
+  "version": "1.0.0",
+  "description": "KRABI — League companion: live draft analysis, elo & form intel, in-game timers. 100% local, LCU-powered.",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @krabi/server & npm run dev --workspace @krabi/web & wait",
+    "dev:server": "npm run dev --workspace @krabi/server",
+    "dev:web": "npm run dev --workspace @krabi/web",
+    "build": "npm run build --workspace @krabi/web",
+    "start": "npm run start --workspace @krabi/server",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "data:refresh": "node scripts/fetch-ddragon.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  }
+}

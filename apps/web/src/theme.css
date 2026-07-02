@@ -1,0 +1,264 @@
+/* ============================================================
+   KRABI — design system "Draft & VOD Analyst"
+   Noir brutaliste · Archivo + JetBrains Mono · accent néon
+   ============================================================ */
+
+:root {
+  --acc: #41ff83;
+  --warn: #ff6a1a;
+  --bg: #000;
+  --panel: #050505;
+  --panel-2: #080808;
+  --line: #333;
+  --line-soft: #171717;
+  --txt: #fff;
+  --txt-2: #e6e6e6;
+  --dim: #9a9a9a;
+  --dim-2: #888;
+  --faint: #666;
+  --ghost: #444;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
+  --sans: 'Archivo', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--txt);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--acc); color: #000; }
+
+a { color: inherit; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar-thumb { background: #2a2a2a; }
+
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.12; } }
+@keyframes caret { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+@keyframes scan { 0% { top: -6%; } 100% { top: 106%; } }
+
+/* ---- structure ---- */
+
+.frame {
+  max-width: 1280px;
+  margin: 0 auto;
+  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.mono { font-family: var(--mono); }
+
+/* grille de panneaux séparés par des joints 1px */
+.grid-joint {
+  display: grid;
+  gap: 1px;
+  background: var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.cell { background: var(--bg); }
+
+/* ---- en-tête de section (01 / TITRE / // commentaire) ---- */
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--line);
+}
+
+.section-head .num {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--acc);
+  font-weight: 700;
+}
+
+.section-head h2 {
+  margin: 0;
+  font-weight: 900;
+  font-size: clamp(17px, 2.4vw, 24px);
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+.section-head .comment {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--dim-2);
+  letter-spacing: 0.05em;
+}
+
+/* ---- panneau type "terminal" ---- */
+
+.panel { background: var(--bg); display: flex; flex-direction: column; min-width: 0; }
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--panel-2);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--txt-2);
+}
+
+.panel-title { display: flex; align-items: center; gap: 9px; }
+
+.dot {
+  width: 7px;
+  height: 7px;
+  background: var(--acc);
+  animation: blink 1.4s ease-in-out infinite;
+  box-shadow: 0 0 6px var(--acc);
+  flex: none;
+}
+
+.dot.off { background: var(--faint); box-shadow: none; animation: none; }
+.dot.warn { background: var(--warn); box-shadow: 0 0 6px var(--warn); }
+
+.scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--acc);
+  opacity: 0.1;
+  animation: scan 5s linear infinite;
+  pointer-events: none;
+}
+
+/* ---- badges ---- */
+
+.badge {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--line);
+  color: var(--dim-2);
+  white-space: nowrap;
+}
+
+.badge.ad { color: var(--warn); border-color: var(--warn); }
+.badge.ap { color: var(--acc); border-color: var(--acc); }
+.badge.hybrid { color: #00e5ff; border-color: #00e5ff; }
+
+/* ---- boutons ---- */
+
+.btn {
+  background: #000;
+  border: 1px solid var(--line);
+  color: var(--dim-2);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  padding: 8px 12px;
+  cursor: pointer;
+  text-transform: uppercase;
+  transition: border-color 0.12s, color 0.12s, background 0.12s;
+}
+
+.btn:hover { border-color: var(--acc); color: var(--acc); }
+
+.btn.active { border-color: var(--acc); color: var(--acc); background: #041a0c; }
+.btn.warn-active { border-color: var(--warn); color: var(--warn); background: #1a0d04; }
+
+/* ---- toggle (interrupteur brutaliste) ---- */
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  border: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  user-select: none;
+  flex: none;
+}
+
+.toggle span { padding: 5px 10px; color: var(--faint); transition: background 0.1s, color 0.1s; }
+.toggle.on span.on-label { background: var(--acc); color: #000; font-weight: 700; }
+.toggle.off span.off-label { background: var(--line); color: var(--txt-2); font-weight: 700; }
+
+/* ---- lignes de tableau draft ---- */
+
+.row-line { border-bottom: 1px solid var(--line-soft); }
+.row-line:last-child { border-bottom: none; }
+
+/* ---- lien op.gg ---- */
+
+.ext-link {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--dim-2);
+  border: 1px solid var(--line);
+  padding: 2px 7px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: border-color 0.12s, color 0.12s;
+}
+
+.ext-link:hover { border-color: var(--acc); color: var(--acc); }
+
+/* ---- barre de dégâts ---- */
+
+.dmg-bar { display: flex; height: 14px; border: 1px solid var(--line); background: #050505; }
+.dmg-bar .phys { background: var(--warn); opacity: 0.85; }
+.dmg-bar .magic { background: var(--acc); opacity: 0.85; }
+
+/* ---- terminal / feed ---- */
+
+.term {
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.75;
+  background: var(--panel);
+  color: #cfcfcf;
+  overflow: auto;
+  padding: 12px 14px;
+}
+
+/* ---- nav ---- */
+
+.nav-tab {
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--dim-2);
+  text-decoration: none;
+  padding: 6px 12px;
+  border: 1px solid transparent;
+  text-transform: uppercase;
+}
+
+.nav-tab:hover { color: var(--txt); }
+.nav-tab.active { color: var(--acc); border-color: var(--acc); }
+
+/* ---- utilitaires ---- */
+
+.crit { color: var(--warn); }
+.ok { color: var(--acc); }
+.dim { color: var(--dim); }
+.faint { color: var(--faint); }
