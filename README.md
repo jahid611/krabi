@@ -5,8 +5,9 @@ clone la champ select en direct, affiche l'elo et la forme des alliés, analyse 
 compo (AD/AP, CC, alertes), puis fournit en jeu les timers de flash, d'ults, de
 camps de jungle et d'objectifs — placés au bon endroit sur la carte.
 
-UI/UX : design "Draft & VOD Analyst" — noir brutaliste, Archivo + JetBrains Mono,
-accent néon, panneaux type terminal.
+UI/UX : design "Draft & VOD Analyst" (variante Clair) — Plus Jakarta Sans +
+JetBrains Mono, cartes arrondies, chips pastel, accent violet — décliné en
+thème sombre à contraste renforcé (défaut) et thème clair.
 
 ## Fonctionnalités
 
@@ -28,8 +29,9 @@ accent néon, panneaux type terminal.
 - Feed d'événements type terminal.
 
 **Settings (`/settings`)**
-- Chaque module s'active/désactive individuellement ; couleur d'accent,
-  scanlines, mode démo. Persisté côté serveur (`apps/server/data/settings.json`).
+- Chaque module s'active/désactive individuellement ; thème sombre/clair,
+  couleur d'accent, mode démo. Persisté côté serveur
+  (`apps/server/data/settings.json`).
 
 **Mode démo** : rejoue en boucle une draft complète puis une partie simulée —
 permet de voir toute l'app fonctionner sans client League.
@@ -43,7 +45,7 @@ apps/server       Node + ws : watcher LCU (lockfile, gameflow, champ select,
                   enrichissement elo/forme via LCU), poller Live Client Data,
                   timers server-authoritative, simulateur démo, API REST + WS
 apps/web          React + Vite : pages Draft / Live / Settings, design system
-                  brutaliste, WebSocket temps réel
+                  sombre/clair à tokens CSS, WebSocket temps réel
 ```
 
 Le serveur est la source de vérité unique (`AppState`) et pousse chaque

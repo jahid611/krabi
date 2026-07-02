@@ -7,11 +7,13 @@ import {
   championByKey,
   formatClock,
   ultCooldownSeconds,
+  type AppSettings,
+  type LiveEvent,
   type LivePlayer,
   type TrackerTimer,
 } from '@krabi/shared';
 import { useApp, useNow } from '../lib/store';
-import { ChampTile, EmptyState, PanelHead, SectionHead } from '../components/ui';
+import { CardHead, ChampTile, EmptyState, LiveChip, PageHead } from '../components/ui';
 
 export function LivePage() {
   const { state } = useApp();
@@ -27,16 +29,19 @@ export function LivePage() {
   if (!state || !live || !settings) {
     return (
       <>
-        <SectionHead num="02" title="Partie en direct" comment="// TIMERS & TRACKING FAÇON OP.GG" />
+        <PageHead
+          title="Ta partie, chronométrée."
+          subtitle="Flash et ults ennemis, camps de jungle et objectifs — les timers au bon endroit, façon op.gg."
+        />
         <EmptyState
-          title="AUCUNE PARTIE DÉTECTÉE"
+          title="// AUCUNE PARTIE DÉTECTÉE"
           lines={[
-            'Le flux Live Client Data (127.0.0.1:2999) sera capté automatiquement',
-            'dès que tu seras en jeu. Sinon, active le mode démo.',
+            'Le flux Live Client Data (127.0.0.1:2999) sera capté automatiquement dès que tu seras en jeu.',
+            'Sinon, active le mode démo.',
           ]}
           action={
-            <Link to="/settings" className="ext-link" style={{ fontSize: 12, padding: '10px 16px' }}>
-              OUVRIR LES SETTINGS ▸ MODE DÉMO
+            <Link to="/settings" className="btn-primary">
+              Ouvrir les settings › mode démo
             </Link>
           }
         />
@@ -48,46 +53,54 @@ export function LivePage() {
 
   return (
     <>
-      <SectionHead
-        num="02"
-        title="Partie en direct"
-        comment={`// SYNC ▸ ${formatClock(live.gameTimeSec)}`}
+      <PageHead
+        title="Ta partie, chronométrée."
+        subtitle="Flash et ults ennemis, camps de jungle et objectifs — les timers au bon endroit, façon op.gg."
+        right={
+          <span className="chip mono" style={{ fontSize: 13, padding: '6px 12px', fontWeight: 700, marginBottom: 6 }}>
+            ⏱ {formatClock(live.gameTimeSec)}
+          </span>
+        }
       />
 
-      <div className="grid-joint" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+          gap: 24,
+          paddingBottom: 56,
+        }}
+      >
         {settings.live.campTimers && (
-          <div className="panel cell">
-            <PanelHead
-              title="JUNGLE_TRACKER"
-              live
-              right={<span style={{ color: 'var(--faint)' }}>CLIQUE UN CAMP ▸ TIMER DE RESPAWN</span>}
-            />
+          <div className="card">
+            <CardHead title="Jungle tracker" right={<span className="kicker" style={{ fontSize: 9.5 }}>Clique un camp ▸ timer</span>} />
             <MapBoard timers={timers} showObjectives={settings.live.objectiveTimers} />
           </div>
         )}
 
-        <div className="panel cell">
-          <PanelHead
-            title="ENEMY_TRACKER"
-            warn
-            right={<span style={{ color: 'var(--faint)' }}>FLASH & ULTS ENNEMIS</span>}
-          />
+        <div className="card">
+          <CardHead title="Trackers ennemis" right={<span className="kicker" style={{ fontSize: 9.5 }}>Flash & ults</span>} />
           <div>
             {enemies.map((p) => (
               <EnemyRow key={p.index} player={p} timers={timers} settings={settings} />
             ))}
           </div>
-
-          {settings.live.objectiveTimers && <ObjectiveStrip timers={timers} />}
+          {settings.live.objectiveTimers && <ObjectiveInset timers={timers} />}
         </div>
 
-        {settings.live.eventFeed && <EventFeed scanlines={settings.scanlines} />}
+        {settings.live.eventFeed && <EventFeed events={live.events} />}
       </div>
     </>
   );
 }
 
 /* ============ carte de la faille (SVG stylisé) ============ */
+
+const CAMP_COLORS: Record<string, string> = {
+  BLUE: '#5b8def',
+  RED: '#e8734d',
+  RIVER: 'var(--green)',
+};
 
 function MapBoard({ timers, showObjectives }: { timers: Map<string, TrackerTimer>; showObjectives: boolean }) {
   const { startTimer, cancelTimer, clockOffset } = useApp();
@@ -105,34 +118,44 @@ function MapBoard({ timers, showObjectives }: { timers: Map<string, TrackerTimer
   };
 
   return (
-    <div style={{ padding: 14 }}>
-      <svg viewBox="0 0 100 100" style={{ width: '100%', display: 'block', border: '1px solid var(--line)', background: '#030303' }}>
+    <div style={{ padding: 18 }}>
+      <svg
+        viewBox="0 0 100 100"
+        style={{ width: '100%', display: 'block', borderRadius: 14, background: 'var(--inset)', border: '1px solid var(--border-soft)' }}
+      >
         {/* rivière (anti-diagonale) et voies */}
-        <polygon points="0,0 12,0 100,88 100,100 88,100 0,12" fill="#0a1410" opacity="0.9" />
-        <polygon points="0,100 8,92 100,0 92,0 0,92" fill="#101010" />
-        <rect x="0" y="0" width="7" height="100" fill="#0d0d0d" />
-        <rect x="0" y="0" width="100" height="7" fill="#0d0d0d" />
-        <rect x="93" y="0" width="7" height="100" fill="#0d0d0d" />
-        <rect x="0" y="93" width="100" height="7" fill="#0d0d0d" />
+        <polygon points="0,0 12,0 100,88 100,100 88,100 0,12" fill="var(--acc)" opacity="0.07" />
+        <polygon points="0,100 8,92 100,0 92,0 0,92" fill="var(--neutral-chip)" opacity="0.10" />
+        <rect x="0" y="0" width="7" height="100" fill="var(--neutral-chip)" opacity="0.08" />
+        <rect x="0" y="0" width="100" height="7" fill="var(--neutral-chip)" opacity="0.08" />
+        <rect x="93" y="0" width="7" height="100" fill="var(--neutral-chip)" opacity="0.08" />
+        <rect x="0" y="93" width="100" height="7" fill="var(--neutral-chip)" opacity="0.08" />
         {/* bases */}
-        <rect x="1" y="85" width="14" height="14" fill="none" stroke="#1d3a2a" strokeWidth="0.6" />
-        <rect x="85" y="1" width="14" height="14" fill="none" stroke="#3a241d" strokeWidth="0.6" />
+        <rect x="1.5" y="85.5" width="13" height="13" rx="3" fill="none" stroke="#5b8def" strokeOpacity="0.5" strokeWidth="0.6" />
+        <rect x="85.5" y="1.5" width="13" height="13" rx="3" fill="none" stroke="#e8734d" strokeOpacity="0.5" strokeWidth="0.6" />
 
         {CAMPS.map((camp) => {
           const refKey = `camp:${camp.id}`;
           const rem = remaining(refKey);
           const cx = camp.x * 100;
           const cy = (1 - camp.y) * 100;
-          const color = camp.side === 'BLUE' ? '#3f7fbf' : camp.side === 'RED' ? '#bf5a3f' : '#3fbf8f';
+          const color = CAMP_COLORS[camp.side];
           return (
             <g key={camp.id} onClick={() => toggle('CAMP', refKey, camp.label, camp.respawnSec)} style={{ cursor: 'pointer' }}>
               <title>{`${camp.label} — respawn ${formatClock(camp.respawnSec)}`}</title>
-              <circle cx={cx} cy={cy} r={3.4} fill="#050505" stroke={rem !== null ? 'var(--acc)' : color} strokeWidth={rem !== null ? 0.9 : 0.6} />
-              <text x={cx} y={cy + 1.1} textAnchor="middle" fontSize="2.8" fontFamily="var(--mono)" fill={rem !== null ? 'var(--acc)' : '#9a9a9a'}>
+              <circle
+                cx={cx}
+                cy={cy}
+                r={3.6}
+                fill="var(--card)"
+                stroke={rem !== null ? 'var(--acc)' : color}
+                strokeWidth={rem !== null ? 1.1 : 0.7}
+              />
+              <text x={cx} y={cy + 1.1} textAnchor="middle" fontSize="2.8" fontWeight="700" fontFamily="'JetBrains Mono', monospace" fill={rem !== null ? 'var(--acc-text)' : 'var(--muted)'}>
                 {camp.short}
               </text>
               {rem !== null && (
-                <text x={cx} y={cy + 6.4} textAnchor="middle" fontSize="3" fontFamily="var(--mono)" fill="var(--acc)" fontWeight="700">
+                <text x={cx} y={cy + 6.8} textAnchor="middle" fontSize="3" fontWeight="700" fontFamily="'JetBrains Mono', monospace" fill="var(--acc-text)">
                   {formatClock(rem)}
                 </text>
               )}
@@ -154,16 +177,17 @@ function MapBoard({ timers, showObjectives }: { timers: Map<string, TrackerTimer
                   y={cy - 3}
                   width="6"
                   height="6"
+                  rx="1.4"
                   transform={`rotate(45 ${cx} ${cy})`}
-                  fill="#050505"
-                  stroke={rem !== null ? 'var(--warn)' : '#e6e6e6'}
-                  strokeWidth="0.7"
+                  fill={rem !== null ? 'var(--orange-bg)' : 'var(--card)'}
+                  stroke="var(--orange-bar)"
+                  strokeWidth="0.8"
                 />
-                <text x={cx} y={cy - 5} textAnchor="middle" fontSize="2.6" fontFamily="var(--mono)" fill="#e6e6e6">
+                <text x={cx} y={cy - 5.2} textAnchor="middle" fontSize="2.6" fontWeight="700" fontFamily="'JetBrains Mono', monospace" fill="var(--orange)">
                   {obj.short}
                 </text>
                 {rem !== null && (
-                  <text x={cx} y={cy + 7.6} textAnchor="middle" fontSize="3.2" fontFamily="var(--mono)" fill="var(--warn)" fontWeight="700">
+                  <text x={cx} y={cy + 8} textAnchor="middle" fontSize="3.2" fontWeight="700" fontFamily="'JetBrains Mono', monospace" fill="var(--orange)">
                     {formatClock(rem)}
                   </text>
                 )}
@@ -171,9 +195,12 @@ function MapBoard({ timers, showObjectives }: { timers: Map<string, TrackerTimer
             );
           })}
       </svg>
-      <div className="mono" style={{ fontSize: 10, color: 'var(--faint)', marginTop: 8, letterSpacing: '0.04em' }}>
-        BUFFS 5:00 · CAMPS 2:15 · SENTINELLES 2:30 · <span className="ok">CLIC ▸ START</span> ·{' '}
-        <span className="crit">RE-CLIC ▸ RESET</span>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 12 }}>
+        <span className="chip mono">Buffs 5:00</span>
+        <span className="chip mono">Camps 2:15</span>
+        <span className="chip mono">Sentinelles 2:30</span>
+        <span className="chip ok">Clic ▸ start</span>
+        <span className="chip danger">Re-clic ▸ reset</span>
       </div>
     </div>
   );
@@ -188,34 +215,38 @@ function EnemyRow({
 }: {
   player: LivePlayer;
   timers: Map<string, TrackerTimer>;
-  settings: NonNullable<ReturnType<typeof useApp>['state']>['settings'];
+  settings: AppSettings;
 }) {
   const champ = championByKey(player.championId);
 
   return (
-    <div className="row-line" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 14px' }}>
-      <ChampTile championKey={player.championId} size={34} />
-      <div style={{ minWidth: 0, flex: 1 }}>
-        <div style={{ fontWeight: 700, fontSize: 13, textTransform: 'uppercase' }}>{champ?.name ?? '—'}</div>
-        <div className="mono" style={{ fontSize: 10, color: 'var(--dim-2)' }}>
+    <div className="player-row">
+      <ChampTile championKey={player.championId} size={40} />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontWeight: 700, fontSize: 14, lineHeight: 1.1 }}>{champ?.name ?? '—'}</div>
+        <div
+          className="mono"
+          style={{ fontSize: 10, color: 'var(--faint)', marginTop: 3, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+        >
           NIV {player.level} · {player.kills}/{player.deaths}/{player.assists}
-          {player.isDead && <span className="crit"> · MORT {player.respawnIn}s</span>}
+          {player.isDead && <span style={{ color: 'var(--red)', fontWeight: 700 }}> · mort {player.respawnIn}s</span>}
         </div>
       </div>
 
-      {settings.live.flashTimers && (
-        <TrackerButton
-          refKey={`flash:${player.index}`}
-          label="FLASH"
-          kind="FLASH"
-          durationSec={FLASH_CD_SEC}
-          timers={timers}
-          activeClass="warn-active"
-        />
-      )}
-      {settings.live.ultTimers && (
-        <UltButton player={player} timers={timers} />
-      )}
+      <div style={{ display: 'flex', gap: 7, flex: 'none' }}>
+        {settings.live.flashTimers && (
+          <TrackerButton
+            refKey={`flash:${player.index}`}
+            idleLabel="Flash"
+            activeLabel="Flash"
+            kind="FLASH"
+            durationSec={FLASH_CD_SEC}
+            timers={timers}
+            activeClass="is-warn"
+          />
+        )}
+        {settings.live.ultTimers && <UltButton player={player} timers={timers} />}
+      </div>
     </div>
   );
 }
@@ -224,36 +255,36 @@ function UltButton({ player, timers }: { player: LivePlayer; timers: Map<string,
   const cd = ultCooldownSeconds(player.championId, player.level);
   if (cd === null) {
     return (
-      <button className="btn" disabled style={{ opacity: 0.35, cursor: 'default' }}>
-        R — NIV 6
+      <button className="btn-ghost" disabled>
+        R · niv 6
       </button>
     );
   }
   return (
     <TrackerButton
       refKey={`ult:${player.index}`}
-      label={`R ${formatClock(cd)}`}
-      shortLabel="R"
+      idleLabel={`R ${formatClock(cd)}`}
+      activeLabel="R"
       kind="ULT"
       durationSec={cd}
       timers={timers}
-      activeClass="active"
+      activeClass="is-ap"
     />
   );
 }
 
 function TrackerButton({
   refKey,
-  label,
-  shortLabel,
+  idleLabel,
+  activeLabel,
   kind,
   durationSec,
   timers,
   activeClass,
 }: {
   refKey: string;
-  label: string;
-  shortLabel?: string;
+  idleLabel: string;
+  activeLabel: string;
   kind: 'FLASH' | 'ULT';
   durationSec: number;
   timers: Map<string, TrackerTimer>;
@@ -266,28 +297,33 @@ function TrackerButton({
 
   if (remaining !== null) {
     return (
-      <button className={`btn ${activeClass}`} onClick={() => cancelTimer(refKey)} title="Re-clic pour annuler">
-        {shortLabel ?? label.split(' ')[0]} ▸ {formatClock(remaining)}
+      <button className={`btn-ghost ${activeClass}`} onClick={() => cancelTimer(refKey)} title="Re-clic pour annuler">
+        {activeLabel} ▸ {formatClock(remaining)}
       </button>
     );
   }
   return (
-    <button className="btn" onClick={() => startTimer(kind, refKey, shortLabel ?? label, durationSec * 1000)} title={`Démarre ${formatClock(durationSec)}`}>
-      {label}
+    <button
+      className="btn-ghost"
+      onClick={() => startTimer(kind, refKey, activeLabel, durationSec * 1000)}
+      title={`Démarre ${formatClock(durationSec)}`}
+    >
+      {idleLabel}
     </button>
   );
 }
 
-/* ============ objectifs (bandeau sous les trackers) ============ */
+/* ============ objectifs (inset sous les trackers) ============ */
 
-function ObjectiveStrip({ timers }: { timers: Map<string, TrackerTimer> }) {
+function ObjectiveInset({ timers }: { timers: Map<string, TrackerTimer> }) {
   const { startTimer, cancelTimer, clockOffset } = useApp();
   const now = useNow();
 
   return (
-    <div style={{ borderTop: '1px solid var(--line)', background: 'var(--panel)', padding: '10px 14px', marginTop: 'auto' }}>
-      <div className="mono" style={{ fontSize: 10, color: 'var(--faint)', letterSpacing: '0.08em', marginBottom: 8 }}>
-        // OBJECTIFS — AUTO SUR ÉVÉNEMENT, CLIC EN SECOURS
+    <div className="card-inset">
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
+        <span className="kicker" style={{ fontSize: 10 }}>Objectifs</span>
+        <span className="kicker" style={{ fontSize: 9.5 }}>Auto sur événement · clic en secours</span>
       </div>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {OBJECTIVES.map((obj) => {
@@ -296,16 +332,16 @@ function ObjectiveStrip({ timers }: { timers: Map<string, TrackerTimer> }) {
           const remaining = timer ? Math.max(0, timer.expiresAt - (now + clockOffset)) / 1000 : null;
           if (remaining !== null) {
             return (
-              <button key={obj.id} className="btn warn-active" onClick={() => cancelTimer(refKey)}>
+              <button key={obj.id} className="btn-ghost is-ad" onClick={() => cancelTimer(refKey)}>
                 {obj.short} ▸ {formatClock(remaining)}
-                {timer?.auto && <span style={{ marginLeft: 6, opacity: 0.7 }}>AUTO</span>}
+                {timer?.auto && <span style={{ opacity: 0.65, fontSize: 10 }}>AUTO</span>}
               </button>
             );
           }
           return (
             <button
               key={obj.id}
-              className="btn"
+              className="btn-ghost"
               onClick={() => startTimer('OBJECTIVE', refKey, obj.short, obj.respawnSec * 1000)}
             >
               {obj.short} {formatClock(obj.respawnSec)}
@@ -317,24 +353,22 @@ function ObjectiveStrip({ timers }: { timers: Map<string, TrackerTimer> }) {
   );
 }
 
-/* ============ feed d'événements (terminal) ============ */
+/* ============ feed d'événements ============ */
 
-const TAG_COLORS: Record<string, string> = {
-  KILL: 'var(--acc)',
-  DEATH: 'var(--warn)',
-  OBJ: '#ffffff',
-  WARD: '#7a7a7a',
-  FLASH: '#e8ff3a',
-  ULT: '#00e5ff',
-  CAMP: '#3fbf8f',
-  TOUR: '#cfcfcf',
-  INHIB: 'var(--warn)',
-  START: 'var(--acc)',
+const TAG_STYLE: Record<string, string> = {
+  KILL: 'ok',
+  DEATH: 'danger',
+  OBJ: 'ad',
+  WARD: '',
+  FLASH: 'pink',
+  ULT: 'ap',
+  CAMP: 'ok',
+  TOUR: '',
+  INHIB: 'danger',
+  START: 'ap',
 };
 
-function EventFeed({ scanlines }: { scanlines: boolean }) {
-  const { state } = useApp();
-  const events = state?.live?.events ?? [];
+function EventFeed({ events }: { events: LiveEvent[] }) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -343,33 +377,50 @@ function EventFeed({ scanlines }: { scanlines: boolean }) {
   }, [events.length]);
 
   return (
-    <div className="panel cell" style={{ minHeight: 260 }}>
-      <PanelHead
-        title="EVENT_FEED"
-        live
-        right={<span className="ok">● LIVE</span>}
-      />
-      <div style={{ position: 'relative', flex: 1, overflow: 'hidden', display: 'flex' }}>
-        <div className="term" ref={ref} style={{ flex: 1, maxHeight: 420 }}>
-          <div style={{ color: 'var(--faint)' }}>
-            <span className="ok">[OK]</span> écoute liveclientdata @ 127.0.0.1:2999
+    <div className="card">
+      <CardHead title="Événements" right={<LiveChip on label="LIVE" />} />
+      <div ref={ref} style={{ overflow: 'auto', maxHeight: 480, flex: 1 }}>
+        {events.length === 0 && (
+          <div style={{ padding: '28px 22px', fontSize: 13.5, color: 'var(--muted)' }}>
+            En attente d'événements — kills, objectifs, wards et flashs apparaîtront ici.
           </div>
-          <div style={{ color: '#2a2a2a', padding: '4px 0' }}>──────────────────────────────</div>
-          {events.map((ev) => (
-            <div key={ev.id} style={{ display: 'flex', gap: 10, alignItems: 'baseline', whiteSpace: 'nowrap' }}>
-              <span style={{ color: '#555' }}>[{formatClock(ev.timeSec)}]</span>
-              <span style={{ color: TAG_COLORS[ev.tag] ?? '#cfcfcf', fontWeight: 700, width: 52, flex: 'none' }}>
-                {ev.tag}
-              </span>
-              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0 }}>{ev.detail}</span>
+        )}
+        {events.map((ev) => (
+          <div key={ev.id} className="feed-row">
+            <span
+              style={{
+                width: 30,
+                height: 30,
+                borderRadius: 7,
+                background: 'var(--neutral-chip-bg)',
+                display: 'grid',
+                placeItems: 'center',
+                flex: 'none',
+              }}
+            >
+              <span
+                style={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: 3,
+                  transform: 'rotate(45deg)',
+                  background: `var(--${TAG_STYLE[ev.tag] === 'ok' ? 'green' : TAG_STYLE[ev.tag] === 'danger' ? 'red' : TAG_STYLE[ev.tag] === 'ad' ? 'orange-bar' : TAG_STYLE[ev.tag] === 'pink' ? 'pink' : TAG_STYLE[ev.tag] === 'ap' ? 'acc' : 'muted'})`,
+                }}
+              />
+            </span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 12.5, fontWeight: 600, lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {ev.detail}
+              </div>
+              <div className="mono" style={{ fontSize: 10, color: 'var(--faint)', marginTop: 1 }}>
+                {formatClock(ev.timeSec)}
+              </div>
             </div>
-          ))}
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center', color: 'var(--acc)', paddingTop: 6 }}>
-            <span>›</span>
-            <span style={{ width: 8, height: 15, background: 'var(--acc)', display: 'inline-block', animation: 'caret 1s steps(1) infinite' }} />
+            <span className={`chip mono ${TAG_STYLE[ev.tag] ?? ''}`} style={{ fontSize: 9, fontWeight: 700 }}>
+              {ev.tag}
+            </span>
           </div>
-        </div>
-        {scanlines && <div className="scan-line" />}
+        ))}
       </div>
     </div>
   );
