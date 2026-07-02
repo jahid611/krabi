@@ -8,7 +8,7 @@ import {
   type TeamAnalysis,
 } from '@krabi/shared';
 import { useApp } from '../lib/store';
-import { ChampTile, DamageBadge, EmptyState, LiveChip, PageHead } from '../components/ui';
+import { ChampTile, DamageBadge, EmptyState, PageHead } from '../components/ui';
 import { formatRank, rankColor } from '../lib/format';
 
 const POSITION_SHORT: Record<string, string> = {
@@ -28,18 +28,19 @@ export function DraftPage() {
     return (
       <>
         <PageHead
+          kicker="Draft"
           title="Lis la draft avant le premier sang."
-          subtitle="Clone en direct de la champ select : picks, bans, elo des alliés et analyse de compo."
+          subtitle="Picks, bans, elo de tes alliés et alertes de compo — en direct pendant la champ select."
         />
         <EmptyState
-          title="// EN ATTENTE DE CHAMP SELECT"
+          title="En attente de champ select"
           lines={[
-            'Lance le client League of Legends et entre en sélection de champion,',
-            'ou active le mode démo pour voir le module tourner.',
+            'Lance League of Legends et entre en sélection de champion —',
+            'ta draft s’affichera ici automatiquement.',
           ]}
           action={
             <Link to="/settings" className="btn-primary">
-              Ouvrir les settings › mode démo
+              Essayer le mode démo
             </Link>
           }
         />
@@ -52,8 +53,9 @@ export function DraftPage() {
   return (
     <>
       <PageHead
+        kicker="Draft"
         title="Lis la draft avant le premier sang."
-        subtitle="Clone en direct de la champ select : picks, bans, elo des alliés et analyse de compo."
+        subtitle="Picks, bans, elo de tes alliés et alertes de compo — en direct pendant la champ select."
         right={
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingBottom: 6 }}>
             <span className="chip ap" style={{ fontSize: 12, padding: '6px 12px' }}>
@@ -83,7 +85,7 @@ export function DraftPage() {
         }}
       >
         <TeamCard
-          title="Équipe bleue — alliés"
+          title="Ton équipe"
           players={cs.allies}
           bans={cs.bans.filter((b) => b.side === 'ALLY')}
           analysis={state.analysis?.ally ?? null}
@@ -91,7 +93,7 @@ export function DraftPage() {
           settings={settings}
         />
         <TeamCard
-          title="Équipe rouge — ennemis"
+          title="Équipe adverse"
           players={cs.enemies}
           bans={cs.bans.filter((b) => b.side === 'ENEMY')}
           analysis={state.analysis?.enemy ?? null}
@@ -116,12 +118,12 @@ function TeamCard({ title, players, bans, analysis, ally, settings }: TeamCardPr
   return (
     <div className="card">
       <div className="card-head">
-        <span className="kicker" style={{ color: 'var(--txt-2)', fontWeight: 700 }}>{title}</span>
-        <LiveChip on label="LIVE" />
+        <span className="card-title">{title}</span>
+        <span className={`chip ${ally ? 'ap' : 'pink'}`}>{ally ? 'BLEU' : 'ROUGE'}</span>
       </div>
 
       {/* bans */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '12px 22px', borderBottom: '1px solid var(--border-soft)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '12px 20px', borderBottom: '1px solid var(--border-soft)' }}>
         <span className="kicker" style={{ fontSize: 9.5 }}>Bans</span>
         <div style={{ display: 'flex', gap: 6 }}>
           {bans.map((ban, i) => (
@@ -165,12 +167,11 @@ function PlayerRow({ player, ally, settings }: { player: PlayerSlot; ally: boole
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           <span style={{ fontWeight: 700, fontSize: 14, lineHeight: 1.1 }}>
-            {champ ? champ.name : acting ? 'En cours…' : '—'}
+            {champ ? champ.name : acting ? 'En train de choisir…' : '—'}
           </span>
           {acting && (
             <span className="chip ok" style={{ fontSize: 9 }}>
-              <span style={{ animation: 'pulse 1.2s ease-in-out infinite' }}>●</span>
-              {player.state === 'BANNING' ? 'EN BAN' : 'EN PICK'}
+              {player.state === 'BANNING' ? 'BAN EN COURS' : 'PICK EN COURS'}
             </span>
           )}
           {player.isSelf && <span className="chip pink" style={{ fontSize: 9 }}>TOI</span>}
@@ -204,8 +205,8 @@ function RankChip({ rank }: { rank: NonNullable<PlayerSlot['rank']> }) {
     <span
       className="chip mono"
       style={{
-        color: `color-mix(in srgb, ${color} 75%, var(--txt))`,
-        background: `color-mix(in srgb, ${color} 16%, transparent)`,
+        color: `color-mix(in srgb, ${color} 80%, #fff)`,
+        background: `color-mix(in srgb, ${color} 18%, transparent)`,
         fontWeight: 700,
       }}
     >
@@ -228,15 +229,11 @@ function FormChips({ form }: { form: NonNullable<PlayerSlot['form']> }) {
             height: 8,
             borderRadius: 3,
             display: 'inline-block',
-            background: win ? 'var(--green)' : 'var(--red)',
-            opacity: win ? 1 : 0.55,
+            background: win ? 'var(--green-solid)' : 'var(--red-solid)',
           }}
         />
       ))}
-      <span
-        className="mono"
-        style={{ fontSize: 11, fontWeight: 800, marginLeft: 4, color: pct >= 50 ? 'var(--green)' : 'var(--orange)' }}
-      >
+      <span className={`chip ${pct >= 50 ? 'solid-win' : 'solid-loss'}`} style={{ fontSize: 10, marginLeft: 4, padding: '2px 6px' }}>
         {pct}%
       </span>
     </span>

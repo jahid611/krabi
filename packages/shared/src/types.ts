@@ -119,8 +119,6 @@ export interface ConnectionStatus {
 
 export interface AppSettings {
   demoMode: boolean;
-  accentColor: string;
-  theme: 'dark' | 'light';
   draft: {
     showElo: boolean;
     showForm: boolean;
@@ -159,8 +157,6 @@ export type DeepPartial<T> = { [K in keyof T]?: T[K] extends object ? DeepPartia
 
 export const DEFAULT_SETTINGS: AppSettings = {
   demoMode: false,
-  accentColor: '#6a5cff',
-  theme: 'dark',
   draft: {
     showElo: true,
     showForm: true,

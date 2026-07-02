@@ -13,7 +13,7 @@ import {
   type TrackerTimer,
 } from '@krabi/shared';
 import { useApp, useNow } from '../lib/store';
-import { CardHead, ChampTile, EmptyState, LiveChip, PageHead } from '../components/ui';
+import { CardHead, ChampTile, EmptyState, PageHead } from '../components/ui';
 
 export function LivePage() {
   const { state } = useApp();
@@ -30,18 +30,19 @@ export function LivePage() {
     return (
       <>
         <PageHead
+          kicker="En direct"
           title="Ta partie, chronométrée."
-          subtitle="Flash et ults ennemis, camps de jungle et objectifs — les timers au bon endroit, façon op.gg."
+          subtitle="Flash et ults ennemis, camps de jungle et objectifs — tous tes timers au bon endroit."
         />
         <EmptyState
-          title="// AUCUNE PARTIE DÉTECTÉE"
+          title="Aucune partie en cours"
           lines={[
-            'Le flux Live Client Data (127.0.0.1:2999) sera capté automatiquement dès que tu seras en jeu.',
-            'Sinon, active le mode démo.',
+            'Ta partie sera détectée automatiquement dès que tu seras en jeu.',
+            'En attendant, tu peux essayer le mode démo.',
           ]}
           action={
             <Link to="/settings" className="btn-primary">
-              Ouvrir les settings › mode démo
+              Essayer le mode démo
             </Link>
           }
         />
@@ -54,8 +55,9 @@ export function LivePage() {
   return (
     <>
       <PageHead
+        kicker="En direct"
         title="Ta partie, chronométrée."
-        subtitle="Flash et ults ennemis, camps de jungle et objectifs — les timers au bon endroit, façon op.gg."
+        subtitle="Flash et ults ennemis, camps de jungle et objectifs — tous tes timers au bon endroit."
         right={
           <span className="chip mono" style={{ fontSize: 13, padding: '6px 12px', fontWeight: 700, marginBottom: 6 }}>
             ⏱ {formatClock(live.gameTimeSec)}
@@ -323,7 +325,7 @@ function ObjectiveInset({ timers }: { timers: Map<string, TrackerTimer> }) {
     <div className="card-inset">
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
         <span className="kicker" style={{ fontSize: 10 }}>Objectifs</span>
-        <span className="kicker" style={{ fontSize: 9.5 }}>Auto sur événement · clic en secours</span>
+        <span className="kicker" style={{ fontSize: 9.5 }}>Démarrage automatique · clic en secours</span>
       </div>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {OBJECTIVES.map((obj) => {
@@ -378,7 +380,7 @@ function EventFeed({ events }: { events: LiveEvent[] }) {
 
   return (
     <div className="card">
-      <CardHead title="Événements" right={<LiveChip on label="LIVE" />} />
+      <CardHead title="Événements" right={<span className="chip ok">EN DIRECT</span>} />
       <div ref={ref} style={{ overflow: 'auto', maxHeight: 480, flex: 1 }}>
         {events.length === 0 && (
           <div style={{ padding: '28px 22px', fontSize: 13.5, color: 'var(--muted)' }}>

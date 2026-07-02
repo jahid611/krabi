@@ -3,8 +3,18 @@ import { championByKey, formatClock, type DamageType } from '@krabi/shared';
 import { championImageUrl } from '../lib/format';
 import { useNow } from '../lib/store';
 
-/** En-tête de page : gros titre + sous-titre, à la manière des sections du site. */
-export function PageHead({ title, subtitle, right }: { title: string; subtitle: string; right?: ReactNode }) {
+/** En-tête de page : kicker uppercase + gros titre, façon DPM. */
+export function PageHead({
+  kicker,
+  title,
+  subtitle,
+  right,
+}: {
+  kicker: string;
+  title: string;
+  subtitle: string;
+  right?: ReactNode;
+}) {
   return (
     <div
       style={{
@@ -13,23 +23,35 @@ export function PageHead({ title, subtitle, right }: { title: string; subtitle: 
         justifyContent: 'space-between',
         gap: 20,
         flexWrap: 'wrap',
-        padding: '44px 0 28px',
+        padding: '40px 0 26px',
       }}
     >
       <div>
+        <div
+          style={{
+            fontSize: 11.5,
+            fontWeight: 700,
+            letterSpacing: '0.22em',
+            textTransform: 'uppercase',
+            color: 'var(--acc-2)',
+            marginBottom: 10,
+          }}
+        >
+          {kicker}
+        </div>
         <h1
           style={{
             margin: 0,
             fontWeight: 800,
-            fontSize: 'clamp(26px, 3.6vw, 40px)',
-            lineHeight: 1.08,
+            fontSize: 'clamp(26px, 3.4vw, 38px)',
+            lineHeight: 1.06,
             letterSpacing: '-0.02em',
             color: 'var(--txt)',
           }}
         >
           {title}
         </h1>
-        <p style={{ margin: '10px 0 0', fontSize: 16, lineHeight: 1.5, color: 'var(--dim)', maxWidth: 560 }}>
+        <p style={{ margin: '10px 0 0', fontSize: 15.5, lineHeight: 1.5, color: 'var(--dim)', maxWidth: 560 }}>
           {subtitle}
         </p>
       </div>
@@ -41,20 +63,9 @@ export function PageHead({ title, subtitle, right }: { title: string; subtitle: 
 export function CardHead({ title, right }: { title: string; right?: ReactNode }) {
   return (
     <div className="card-head">
-      <span className="kicker" style={{ color: 'var(--txt-2)', fontWeight: 700 }}>
-        {title}
-      </span>
+      <span className="card-title">{title}</span>
       {right}
     </div>
-  );
-}
-
-export function LiveChip({ on, label, offLabel }: { on: boolean; label?: string; offLabel?: string }) {
-  return (
-    <span className={`live-chip${on ? '' : ' off'}`}>
-      <span className="dot" />
-      {on ? (label ?? 'LIVE') : (offLabel ?? 'OFFLINE')}
-    </span>
   );
 }
 
@@ -81,7 +92,7 @@ export function ChampTile({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    background: 'var(--neutral-chip-bg)',
+    background: 'rgba(255, 255, 255, 0.05)',
     fontFamily: "'JetBrains Mono', ui-monospace, monospace",
     fontSize: Math.max(9, size * 0.26),
     fontWeight: 700,
@@ -92,7 +103,7 @@ export function ChampTile({
 
   const content =
     !champ || championKey === 0 ? (
-      <span style={{ color: 'var(--ghost)' }}>—</span>
+      <span style={{ color: 'var(--faint)' }}>—</span>
     ) : broken ? (
       champ.name.slice(0, 2).toUpperCase()
     ) : (
@@ -124,7 +135,7 @@ export function ChampTile({
             left: -2,
             right: -2,
             height: 2,
-            background: 'var(--red)',
+            background: 'var(--red-solid)',
             borderRadius: 2,
             transform: 'rotate(-20deg)',
           }}
@@ -165,7 +176,16 @@ export function Switch({ value, onChange }: { value: boolean; onChange: (v: bool
 export function EmptyState({ title, lines, action }: { title: string; lines: string[]; action?: ReactNode }) {
   return (
     <div className="card" style={{ alignItems: 'center', textAlign: 'center', padding: '64px 28px', marginBottom: 48 }}>
-      <span className="kicker" style={{ color: 'var(--acc-text)', marginBottom: 16 }}>
+      <span
+        style={{
+          fontSize: 11,
+          fontWeight: 700,
+          letterSpacing: '0.2em',
+          textTransform: 'uppercase',
+          color: 'var(--acc-2)',
+          marginBottom: 16,
+        }}
+      >
         {title}
       </span>
       {lines.map((line) => (

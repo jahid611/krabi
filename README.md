@@ -5,9 +5,9 @@ clone la champ select en direct, affiche l'elo et la forme des alliés, analyse 
 compo (AD/AP, CC, alertes), puis fournit en jeu les timers de flash, d'ults, de
 camps de jungle et d'objectifs — placés au bon endroit sur la carte.
 
-UI/UX : design "Draft & VOD Analyst" (variante Clair) — Plus Jakarta Sans +
-JetBrains Mono, cartes arrondies, chips pastel, accent violet — décliné en
-thème sombre à contraste renforcé (défaut) et thème clair.
+UI/UX : identité sombre inspirée de dpm.lol — navy profond avec halos
+violet/rose, cartes à liseré dégradé, chips pleines, Inter + JetBrains Mono.
+Wording 100% joueur : aucun jargon technique dans l'interface.
 
 ## Fonctionnalités
 
@@ -28,10 +28,9 @@ thème sombre à contraste renforcé (défaut) et thème clair.
   les événements du jeu.
 - Feed d'événements type terminal.
 
-**Settings (`/settings`)**
-- Chaque module s'active/désactive individuellement ; thème sombre/clair,
-  couleur d'accent, mode démo. Persisté côté serveur
-  (`apps/server/data/settings.json`).
+**Réglages (`/settings`)**
+- Chaque module s'active/désactive individuellement ; mode démo. Persisté
+  côté serveur (`apps/server/data/settings.json`).
 
 **Mode démo** : rejoue en boucle une draft complète puis une partie simulée —
 permet de voir toute l'app fonctionner sans client League.
@@ -44,8 +43,8 @@ packages/shared   types partagés, dataset champions (dégâts/CC/ults),
 apps/server       Node + ws : watcher LCU (lockfile, gameflow, champ select,
                   enrichissement elo/forme via LCU), poller Live Client Data,
                   timers server-authoritative, simulateur démo, API REST + WS
-apps/web          React + Vite : pages Draft / Live / Settings, design system
-                  sombre/clair à tokens CSS, WebSocket temps réel
+apps/web          React + Vite : pages Draft / En direct / Réglages,
+                  design system sombre à tokens CSS, WebSocket temps réel
 ```
 
 Le serveur est la source de vérité unique (`AppState`) et pousse chaque
