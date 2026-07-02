@@ -83,3 +83,10 @@ export function campIconSrcs(type: string): string[] {
   const file = CAMP_ICON_FILES[type];
   return [`/game/${type}.png`, ...(file ? [`${CDRAGON_MINIMAP}/${file}`] : [])];
 }
+
+/** Vraie minimap de la Faille (surcharge locale ▸ Data Dragon ▸ CommunityDragon). */
+export const MINIMAP_SRCS = [
+  '/game/minimap.png',
+  `${DDRAGON}/map/map11.png`,
+  'https://raw.communitydragon.org/latest/game/levels/map11/info/2dlevelminimap.png',
+];

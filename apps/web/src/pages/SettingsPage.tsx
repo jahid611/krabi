@@ -2,25 +2,22 @@ import type { ReactNode } from 'react';
 import type { AppSettings, DeepPartial } from '@krabi/shared';
 import { useApp } from '../lib/store';
 import { CardHead, PageHead, Switch } from '../components/ui';
-import { FloatingDecor } from '../components/Decor';
 
 export function SettingsPage() {
   const { state, patchSettings } = useApp();
   const settings = state?.settings;
 
   if (!settings) {
-    return <PageHead kicker="Réglages" title="Réglages" subtitle="Chargement…" />;
+    return <PageHead title="Réglages" subtitle="Chargement…" />;
   }
 
   const patch = (p: DeepPartial<AppSettings>) => patchSettings(p);
 
   return (
     <>
-      <FloatingDecor page="settings" />
       <PageHead
-        kicker="Réglages"
-        title="Tout est débrayable."
-        subtitle="Active ou coupe chaque module individuellement — appliqué instantanément."
+        title="Réglages"
+        subtitle="Chaque module s'active ou se coupe individuellement — appliqué instantanément."
       />
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: 24, paddingBottom: 56 }}>
@@ -70,8 +67,8 @@ export function SettingsPage() {
         <div className="card">
           <CardHead title="En jeu" />
           <Row
-            label="Timers de flash"
-            desc="Un clic quand un ennemi flash — compte à rebours de 5:00 sur sa ligne."
+            label="Timers de sorts d'invocateur"
+            desc="Flash, TP, ignite… un clic sur l'icône quand l'ennemi utilise son sort."
             control={<Switch value={settings.live.flashTimers} onChange={(v) => patch({ live: { flashTimers: v } })} />}
           />
           <Row

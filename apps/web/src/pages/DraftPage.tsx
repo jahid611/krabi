@@ -9,7 +9,6 @@ import {
 } from '@krabi/shared';
 import { useApp } from '../lib/store';
 import { ChampTile, DamageBadge, EmptyState, PageHead } from '../components/ui';
-import { FloatingDecor } from '../components/Decor';
 import { formatRank, rankColor } from '../lib/format';
 
 const POSITION_SHORT: Record<string, string> = {
@@ -28,10 +27,8 @@ export function DraftPage() {
   if (!state || !cs || !settings) {
     return (
       <>
-        <FloatingDecor page="draft" />
         <PageHead
-          kicker="Draft"
-          title="Lis la draft avant le premier sang."
+          title="Draft"
           subtitle="Picks, bans, elo de tes alliés et alertes de compo — en direct pendant la champ select."
         />
         <EmptyState
@@ -54,11 +51,8 @@ export function DraftPage() {
 
   return (
     <>
-      <FloatingDecor page="draft" />
       <PageHead
-        kicker="Draft"
-        title="Lis la draft avant le premier sang."
-        subtitle="Picks, bans, elo de tes alliés et alertes de compo — en direct pendant la champ select."
+        title="Draft"
         right={
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingBottom: 6 }}>
             <span className="chip ap" style={{ fontSize: 12, padding: '6px 12px' }}>
@@ -122,7 +116,6 @@ function TeamCard({ title, players, bans, analysis, ally, settings }: TeamCardPr
     <div className="card">
       <div className="card-head">
         <span className="card-title">{title}</span>
-        <span className={`chip ${ally ? 'ap' : 'pink'}`}>{ally ? 'BLEU' : 'ROUGE'}</span>
       </div>
 
       {/* bans */}
@@ -189,9 +182,6 @@ function PlayerRow({ player, ally, settings }: { player: PlayerSlot; ally: boole
         {ally && settings.draft.showElo && player.rank && <RankChip rank={player.rank} />}
         {ally && settings.draft.showForm && player.form && <FormChips form={player.form} />}
         {champ && <DamageBadge dmg={champ.dmg} />}
-        {champ && settings.draft.ccAnalysis && (
-          <span className="chip mono">CC {Math.round(champ.cc * 10) / 10}s</span>
-        )}
         {ally && settings.draft.showOpgg && player.opggUrl && (
           <a href={player.opggUrl} target="_blank" rel="noopener noreferrer" className="btn-ghost" style={{ padding: '4px 9px', fontSize: 10.5 }}>
             OP.GG ↗
@@ -250,30 +240,21 @@ function AnalysisInset({ analysis, ally, settings }: { analysis: TeamAnalysis; a
   return (
     <div className="card-inset">
       {settings.draft.damageAnalysis && (
-        <>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-            <span className="kicker" style={{ fontSize: 10 }}>Dégâts</span>
-            <span className="mono" style={{ fontSize: 10, color: 'var(--dim)' }}>
-              {physPct}% AD · {magicPct}% AP
-            </span>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div className="dmg-bar">
             <div className="phys" style={{ width: `${physPct}%` }} />
             <div className="magic" style={{ width: `${magicPct}%` }} />
           </div>
-        </>
+          <span className="mono" style={{ fontSize: 10.5, color: 'var(--dim)', flex: 'none' }}>
+            {physPct}% AD · {magicPct}% AP
+          </span>
+          {settings.draft.ccAnalysis && (
+            <span className="mono" style={{ fontSize: 10.5, color: 'var(--muted)', flex: 'none' }}>
+              CC {analysis.ccLockSeconds.toFixed(1)}s
+            </span>
+          )}
+        </div>
       )}
-
-      <div style={{ display: 'flex', gap: 6, marginTop: 11, flexWrap: 'wrap' }}>
-        <span className="chip mono">{analysis.pickedCount}/5 picks</span>
-        <span className="chip mono">
-          {analysis.adCount} AD · {analysis.apCount} AP
-          {analysis.hybridCount > 0 ? ` · ${analysis.hybridCount} HYB` : ''}
-        </span>
-        {settings.draft.ccAnalysis && (
-          <span className="chip mono">CC {analysis.ccLockSeconds.toFixed(1)}s</span>
-        )}
-      </div>
 
       {settings.draft.compAlerts &&
         analysis.alerts.map((alert) => <AlertBox key={alert.code} alert={alert} ally={ally} />)}

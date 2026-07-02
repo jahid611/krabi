@@ -31,16 +31,14 @@ export function ImgChain({
   );
 }
 
-/** En-tête de page : kicker uppercase + gros titre, façon DPM. */
+/** En-tête de page minimal : titre + sous-titre courts, façon Discord. */
 export function PageHead({
-  kicker,
   title,
   subtitle,
   right,
 }: {
-  kicker: string;
   title: string;
-  subtitle: string;
+  subtitle?: string;
   right?: ReactNode;
 }) {
   return (
@@ -49,39 +47,18 @@ export function PageHead({
         display: 'flex',
         alignItems: 'flex-end',
         justifyContent: 'space-between',
-        gap: 20,
+        gap: 16,
         flexWrap: 'wrap',
-        padding: '40px 0 26px',
+        padding: '26px 0 18px',
       }}
     >
       <div>
-        <div
-          style={{
-            fontSize: 11.5,
-            fontWeight: 700,
-            letterSpacing: '0.22em',
-            textTransform: 'uppercase',
-            color: 'var(--acc-2)',
-            marginBottom: 10,
-          }}
-        >
-          {kicker}
-        </div>
-        <h1
-          style={{
-            margin: 0,
-            fontWeight: 800,
-            fontSize: 'clamp(26px, 3.4vw, 38px)',
-            lineHeight: 1.06,
-            letterSpacing: '-0.02em',
-            color: 'var(--txt)',
-          }}
-        >
-          {title}
-        </h1>
-        <p style={{ margin: '10px 0 0', fontSize: 15.5, lineHeight: 1.5, color: 'var(--dim)', maxWidth: 560 }}>
-          {subtitle}
-        </p>
+        <h1 style={{ margin: 0, fontWeight: 700, fontSize: 20, lineHeight: 1.2, color: 'var(--txt)' }}>{title}</h1>
+        {subtitle && (
+          <p style={{ margin: '4px 0 0', fontSize: 13, lineHeight: 1.5, color: 'var(--muted)', maxWidth: 560 }}>
+            {subtitle}
+          </p>
+        )}
       </div>
       {right}
     </div>

@@ -275,6 +275,18 @@ export class Simulator {
   }
 
   private buildPlayers(gameTime: number): LivePlayer[] {
+    const SPELLS: Record<number, [string, string]> = {
+      0: ['SummonerFlash', 'SummonerTeleport'],
+      1: ['SummonerFlash', 'SummonerSmite'],
+      2: ['SummonerFlash', 'SummonerDot'],
+      3: ['SummonerFlash', 'SummonerHeal'],
+      4: ['SummonerFlash', 'SummonerDot'],
+      5: ['SummonerFlash', 'SummonerTeleport'],
+      6: ['SummonerFlash', 'SummonerSmite'],
+      7: ['SummonerFlash', 'SummonerDot'],
+      8: ['SummonerFlash', 'SummonerHeal'],
+      9: ['SummonerFlash', 'SummonerDot'],
+    };
     const mk = (championId: number, index: number, isEnemy: boolean): LivePlayer => {
       const s = this.scores.get(index) ?? { kills: 0, deaths: 0, assists: 0 };
       const mock = !isEnemy ? MOCK_ALLIES[index] : null;
@@ -290,7 +302,7 @@ export class Simulator {
         assists: s.assists,
         isDead: false,
         respawnIn: 0,
-        spells: ['SummonerFlash', index === 1 || index === 6 ? 'SummonerSmite' : 'SummonerDot'],
+        spells: SPELLS[index] ?? ['SummonerFlash', 'SummonerDot'],
       };
     };
     return [
@@ -315,7 +327,7 @@ export class Simulator {
     if (!this.store.getSettings().live.flashTimers) return;
     this.store.startTimer({
       kind: 'FLASH',
-      refKey: `flash:${playerIdx}`,
+      refKey: `spell:${playerIdx}:0`, // slot 0 = flash dans le scénario
       label: 'FLASH',
       durationMs: FLASH_CD_SEC * 1000,
       auto: true,

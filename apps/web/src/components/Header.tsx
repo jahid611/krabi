@@ -29,24 +29,21 @@ export function Header() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 'none' }}>
           <span
             style={{
-              width: 32,
-              height: 32,
-              borderRadius: 9,
-              background: 'linear-gradient(135deg, var(--acc) 0%, var(--pink) 130%)',
+              width: 30,
+              height: 30,
+              borderRadius: 8,
+              background: 'var(--acc)',
               display: 'grid',
               placeItems: 'center',
               color: '#fff',
               fontWeight: 800,
-              fontSize: 15,
-              boxShadow: '0 3px 12px rgba(124, 92, 255, 0.4)',
+              fontSize: 14,
               flex: 'none',
             }}
           >
             K
           </span>
-          <span style={{ fontWeight: 800, fontSize: 17, letterSpacing: '-0.01em' }}>
-            KRABI<span style={{ color: 'var(--acc-2)' }}>.GG</span>
-          </span>
+          <span style={{ fontWeight: 700, fontSize: 16 }}>Krabi</span>
         </div>
 
         <div style={{ display: 'flex', gap: 4 }}>
