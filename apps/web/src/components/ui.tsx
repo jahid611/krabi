@@ -3,6 +3,34 @@ import { championByKey, formatClock, type DamageType } from '@krabi/shared';
 import { championImageUrl } from '../lib/format';
 import { useNow } from '../lib/store';
 
+/**
+ * Image avec chaîne de fallback : essaie chaque URL dans l'ordre,
+ * puis rend `fallback` si aucune ne charge (offline, asset absent…).
+ */
+export function ImgChain({
+  srcs,
+  alt = '',
+  style,
+  fallback = null,
+}: {
+  srcs: string[];
+  alt?: string;
+  style?: CSSProperties;
+  fallback?: ReactNode;
+}) {
+  const [idx, setIdx] = useState(0);
+  if (idx >= srcs.length) return <>{fallback}</>;
+  return (
+    <img
+      src={srcs[idx]}
+      alt={alt}
+      style={style}
+      draggable={false}
+      onError={() => setIdx((i) => i + 1)}
+    />
+  );
+}
+
 /** En-tête de page : kicker uppercase + gros titre, façon DPM. */
 export function PageHead({
   kicker,
@@ -175,7 +203,11 @@ export function Switch({ value, onChange }: { value: boolean; onChange: (v: bool
 
 export function EmptyState({ title, lines, action }: { title: string; lines: string[]; action?: ReactNode }) {
   return (
-    <div className="card" style={{ alignItems: 'center', textAlign: 'center', padding: '64px 28px', marginBottom: 48 }}>
+    <div className="card" style={{ alignItems: 'center', textAlign: 'center', padding: '48px 28px 56px', marginBottom: 48 }}>
+      <ImgChain
+        srcs={['/decor/poro.png']}
+        style={{ width: 110, marginBottom: 14, filter: 'drop-shadow(0 10px 24px rgba(0,0,0,0.45))' }}
+      />
       <span
         style={{
           fontSize: 11,

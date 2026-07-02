@@ -9,6 +9,7 @@ import {
 } from '@krabi/shared';
 import { useApp } from '../lib/store';
 import { ChampTile, DamageBadge, EmptyState, PageHead } from '../components/ui';
+import { FloatingDecor } from '../components/Decor';
 import { formatRank, rankColor } from '../lib/format';
 
 const POSITION_SHORT: Record<string, string> = {
@@ -27,6 +28,7 @@ export function DraftPage() {
   if (!state || !cs || !settings) {
     return (
       <>
+        <FloatingDecor page="draft" />
         <PageHead
           kicker="Draft"
           title="Lis la draft avant le premier sang."
@@ -52,6 +54,7 @@ export function DraftPage() {
 
   return (
     <>
+      <FloatingDecor page="draft" />
       <PageHead
         kicker="Draft"
         title="Lis la draft avant le premier sang."

@@ -335,6 +335,26 @@ a { color: inherit; }
 
 .setting-row + .setting-row { border-top: 1px solid var(--border-soft); }
 
+/* ---- décor flottant (gouttières de page) ---- */
+
+.decor {
+  position: fixed;
+  z-index: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 14px 34px rgba(0, 0, 0, 0.5));
+}
+
+.decor img { animation: floaty 7s ease-in-out infinite alternate; }
+
+@keyframes floaty {
+  from { translate: 0 -7px; }
+  to { translate: 0 7px; }
+}
+
+@media (max-width: 1500px) {
+  .decor { display: none; }
+}
+
 /* ---- feed ---- */
 
 .feed-row {

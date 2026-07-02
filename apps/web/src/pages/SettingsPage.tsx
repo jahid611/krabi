@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { AppSettings, DeepPartial } from '@krabi/shared';
 import { useApp } from '../lib/store';
 import { CardHead, PageHead, Switch } from '../components/ui';
+import { FloatingDecor } from '../components/Decor';
 
 export function SettingsPage() {
   const { state, patchSettings } = useApp();
@@ -15,6 +16,7 @@ export function SettingsPage() {
 
   return (
     <>
+      <FloatingDecor page="settings" />
       <PageHead
         kicker="Réglages"
         title="Tout est débrayable."
@@ -39,8 +41,8 @@ export function SettingsPage() {
             control={<Switch value={settings.draft.showElo} onChange={(v) => patch({ draft: { showElo: v } })} />}
           />
           <Row
-            label="Forme — 5 dernières parties"
-            desc="Victoires, défaites et winrate récent de chaque allié."
+            label="Forme — 5 dernières ranked"
+            desc="Victoires, défaites et winrate des 5 dernières parties classées de chaque allié."
             control={<Switch value={settings.draft.showForm} onChange={(v) => patch({ draft: { showForm: v } })} />}
           />
           <Row

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import {
   CAMPS,
@@ -13,7 +13,9 @@ import {
   type TrackerTimer,
 } from '@krabi/shared';
 import { useApp, useNow } from '../lib/store';
-import { CardHead, ChampTile, EmptyState, PageHead } from '../components/ui';
+import { CardHead, ChampTile, EmptyState, ImgChain, PageHead } from '../components/ui';
+import { FloatingDecor } from '../components/Decor';
+import { campIconSrcs, campType, FLASH_ICON_SRCS, ultIconSrcs } from '../lib/format';
 
 export function LivePage() {
   const { state } = useApp();
@@ -29,6 +31,7 @@ export function LivePage() {
   if (!state || !live || !settings) {
     return (
       <>
+        <FloatingDecor page="live" />
         <PageHead
           kicker="En direct"
           title="Ta partie, chronométrée."
@@ -54,6 +57,7 @@ export function LivePage() {
 
   return (
     <>
+      <FloatingDecor page="live" />
       <PageHead
         kicker="En direct"
         title="Ta partie, chronométrée."
@@ -96,12 +100,12 @@ export function LivePage() {
   );
 }
 
-/* ============ carte de la faille (SVG stylisé) ============ */
+/* ============ carte de la faille ============ */
 
 const CAMP_COLORS: Record<string, string> = {
   BLUE: '#5b8def',
   RED: '#e8734d',
-  RIVER: 'var(--green)',
+  RIVER: '#37d67d',
 };
 
 function MapBoard({ timers, showObjectives }: { timers: Map<string, TrackerTimer>; showObjectives: boolean }) {
@@ -121,47 +125,52 @@ function MapBoard({ timers, showObjectives }: { timers: Map<string, TrackerTimer
 
   return (
     <div style={{ padding: 18 }}>
-      <svg
-        viewBox="0 0 100 100"
-        style={{ width: '100%', display: 'block', borderRadius: 14, background: 'var(--inset)', border: '1px solid var(--border-soft)' }}
+      <div
+        style={{
+          position: 'relative',
+          width: '100%',
+          aspectRatio: '1',
+          borderRadius: 14,
+          background: 'var(--inset)',
+          border: '1px solid var(--border-soft)',
+          overflow: 'hidden',
+        }}
       >
-        {/* rivière (anti-diagonale) et voies */}
-        <polygon points="0,0 12,0 100,88 100,100 88,100 0,12" fill="var(--acc)" opacity="0.07" />
-        <polygon points="0,100 8,92 100,0 92,0 0,92" fill="var(--neutral-chip)" opacity="0.10" />
-        <rect x="0" y="0" width="7" height="100" fill="var(--neutral-chip)" opacity="0.08" />
-        <rect x="0" y="0" width="100" height="7" fill="var(--neutral-chip)" opacity="0.08" />
-        <rect x="93" y="0" width="7" height="100" fill="var(--neutral-chip)" opacity="0.08" />
-        <rect x="0" y="93" width="100" height="7" fill="var(--neutral-chip)" opacity="0.08" />
-        {/* bases */}
-        <rect x="1.5" y="85.5" width="13" height="13" rx="3" fill="none" stroke="#5b8def" strokeOpacity="0.5" strokeWidth="0.6" />
-        <rect x="85.5" y="1.5" width="13" height="13" rx="3" fill="none" stroke="#e8734d" strokeOpacity="0.5" strokeWidth="0.6" />
+        {/* fond : rivière, voies, bases */}
+        <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
+          <polygon points="0,0 12,0 100,88 100,100 88,100 0,12" fill="var(--acc)" opacity="0.07" />
+          <polygon points="0,100 8,92 100,0 92,0 0,92" fill="#aab3d0" opacity="0.10" />
+          <rect x="0" y="0" width="7" height="100" fill="#aab3d0" opacity="0.08" />
+          <rect x="0" y="0" width="100" height="7" fill="#aab3d0" opacity="0.08" />
+          <rect x="93" y="0" width="7" height="100" fill="#aab3d0" opacity="0.08" />
+          <rect x="0" y="93" width="100" height="7" fill="#aab3d0" opacity="0.08" />
+          <rect x="1.5" y="85.5" width="13" height="13" rx="3" fill="none" stroke="#5b8def" strokeOpacity="0.5" strokeWidth="0.6" />
+          <rect x="85.5" y="1.5" width="13" height="13" rx="3" fill="none" stroke="#e8734d" strokeOpacity="0.5" strokeWidth="0.6" />
+        </svg>
 
         {CAMPS.map((camp) => {
           const refKey = `camp:${camp.id}`;
           const rem = remaining(refKey);
-          const cx = camp.x * 100;
-          const cy = (1 - camp.y) * 100;
-          const color = CAMP_COLORS[camp.side];
+          const type = campType(camp.id);
           return (
-            <g key={camp.id} onClick={() => toggle('CAMP', refKey, camp.label, camp.respawnSec)} style={{ cursor: 'pointer' }}>
-              <title>{`${camp.label} — respawn ${formatClock(camp.respawnSec)}`}</title>
-              <circle
-                cx={cx}
-                cy={cy}
-                r={3.6}
-                fill="var(--card)"
-                stroke={rem !== null ? 'var(--acc)' : color}
-                strokeWidth={rem !== null ? 1.1 : 0.7}
-              />
-              <text x={cx} y={cy + 1.1} textAnchor="middle" fontSize="2.8" fontWeight="700" fontFamily="'JetBrains Mono', monospace" fill={rem !== null ? 'var(--acc-text)' : 'var(--muted)'}>
-                {camp.short}
-              </text>
-              {rem !== null && (
-                <text x={cx} y={cy + 6.8} textAnchor="middle" fontSize="3" fontWeight="700" fontFamily="'JetBrains Mono', monospace" fill="var(--acc-text)">
-                  {formatClock(rem)}
-                </text>
-              )}
-            </g>
+            <MapMarker
+              key={camp.id}
+              x={camp.x}
+              y={camp.y}
+              size={30}
+              color={CAMP_COLORS[camp.side]}
+              active={rem !== null}
+              countdown={rem}
+              title={`${camp.label} — respawn ${formatClock(camp.respawnSec)}`}
+              onClick={() => toggle('CAMP', refKey, camp.label, camp.respawnSec)}
+              icon={
+                <ImgChain
+                  srcs={campIconSrcs(type)}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  fallback={<span className="mono" style={{ fontSize: 10, fontWeight: 700, color: 'var(--txt-2)' }}>{camp.short}</span>}
+                />
+              }
+            />
           );
         })}
 
@@ -169,34 +178,29 @@ function MapBoard({ timers, showObjectives }: { timers: Map<string, TrackerTimer
           OBJECTIVES.filter((o) => o.id !== 'herald').map((obj) => {
             const refKey = `obj:${obj.id}`;
             const rem = remaining(refKey);
-            const cx = obj.x * 100;
-            const cy = (1 - obj.y) * 100;
             return (
-              <g key={obj.id} onClick={() => toggle('OBJECTIVE', refKey, obj.short, obj.respawnSec)} style={{ cursor: 'pointer' }}>
-                <title>{`${obj.label} — respawn ${formatClock(obj.respawnSec)}`}</title>
-                <rect
-                  x={cx - 3}
-                  y={cy - 3}
-                  width="6"
-                  height="6"
-                  rx="1.4"
-                  transform={`rotate(45 ${cx} ${cy})`}
-                  fill={rem !== null ? 'var(--orange-bg)' : 'var(--card)'}
-                  stroke="var(--orange-bar)"
-                  strokeWidth="0.8"
-                />
-                <text x={cx} y={cy - 5.2} textAnchor="middle" fontSize="2.6" fontWeight="700" fontFamily="'JetBrains Mono', monospace" fill="var(--orange)">
-                  {obj.short}
-                </text>
-                {rem !== null && (
-                  <text x={cx} y={cy + 8} textAnchor="middle" fontSize="3.2" fontWeight="700" fontFamily="'JetBrains Mono', monospace" fill="var(--orange)">
-                    {formatClock(rem)}
-                  </text>
-                )}
-              </g>
+              <MapMarker
+                key={obj.id}
+                x={obj.x}
+                y={obj.y}
+                size={38}
+                color="var(--orange-bar)"
+                active={rem !== null}
+                countdown={rem}
+                title={`${obj.label} — respawn ${formatClock(obj.respawnSec)}`}
+                onClick={() => toggle('OBJECTIVE', refKey, obj.short, obj.respawnSec)}
+                icon={
+                  <ImgChain
+                    srcs={campIconSrcs(obj.id)}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    fallback={<span className="mono" style={{ fontSize: 9, fontWeight: 700, color: 'var(--orange)' }}>{obj.short}</span>}
+                  />
+                }
+              />
             );
           })}
-      </svg>
+      </div>
+
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 12 }}>
         <span className="chip mono">Buffs 5:00</span>
         <span className="chip mono">Camps 2:15</span>
@@ -205,6 +209,84 @@ function MapBoard({ timers, showObjectives }: { timers: Map<string, TrackerTimer
         <span className="chip danger">Re-clic ▸ reset</span>
       </div>
     </div>
+  );
+}
+
+function MapMarker({
+  x,
+  y,
+  size,
+  color,
+  active,
+  countdown,
+  title,
+  onClick,
+  icon,
+}: {
+  x: number;
+  y: number;
+  size: number;
+  color: string;
+  active: boolean;
+  countdown: number | null;
+  title: string;
+  onClick: () => void;
+  icon: ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      style={{
+        position: 'absolute',
+        left: `${x * 100}%`,
+        top: `${(1 - y) * 100}%`,
+        transform: 'translate(-50%, -50%)',
+        background: 'none',
+        border: 'none',
+        padding: 0,
+        cursor: 'pointer',
+        zIndex: active ? 3 : 2,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 2,
+      }}
+    >
+      <span
+        style={{
+          width: size,
+          height: size,
+          borderRadius: '50%',
+          overflow: 'hidden',
+          display: 'grid',
+          placeItems: 'center',
+          background: 'rgba(8, 10, 20, 0.85)',
+          border: `2px solid ${active ? 'var(--acc-2)' : color}`,
+          boxShadow: active ? '0 0 12px rgba(124, 92, 255, 0.65)' : '0 2px 8px rgba(0, 0, 0, 0.5)',
+          opacity: active ? 1 : 0.92,
+        }}
+      >
+        {icon}
+      </span>
+      {countdown !== null && (
+        <span
+          className="mono"
+          style={{
+            fontSize: 10.5,
+            fontWeight: 700,
+            color: '#fff',
+            background: 'rgba(8, 10, 20, 0.85)',
+            border: '1px solid var(--acc)',
+            borderRadius: 5,
+            padding: '1px 5px',
+            lineHeight: 1.4,
+          }}
+        >
+          {formatClock(countdown)}
+        </span>
+      )}
+    </button>
   );
 }
 
@@ -239,8 +321,9 @@ function EnemyRow({
         {settings.live.flashTimers && (
           <TrackerButton
             refKey={`flash:${player.index}`}
+            icon={<ImgChain srcs={FLASH_ICON_SRCS} style={{ width: 18, height: 18, borderRadius: 4, display: 'block' }} fallback={<span>⚡</span>} />}
             idleLabel="Flash"
-            activeLabel="Flash"
+            activeLabel=""
             kind="FLASH"
             durationSec={FLASH_CD_SEC}
             timers={timers}
@@ -255,18 +338,26 @@ function EnemyRow({
 
 function UltButton({ player, timers }: { player: LivePlayer; timers: Map<string, TrackerTimer> }) {
   const cd = ultCooldownSeconds(player.championId, player.level);
+  const icon = (
+    <ImgChain
+      srcs={ultIconSrcs(player.championId)}
+      style={{ width: 18, height: 18, borderRadius: 4, display: 'block', filter: cd === null ? 'grayscale(1)' : undefined }}
+      fallback={<span>R</span>}
+    />
+  );
   if (cd === null) {
     return (
       <button className="btn-ghost" disabled>
-        R · niv 6
+        {icon} niv 6
       </button>
     );
   }
   return (
     <TrackerButton
       refKey={`ult:${player.index}`}
-      idleLabel={`R ${formatClock(cd)}`}
-      activeLabel="R"
+      icon={icon}
+      idleLabel={formatClock(cd)}
+      activeLabel=""
       kind="ULT"
       durationSec={cd}
       timers={timers}
@@ -277,6 +368,7 @@ function UltButton({ player, timers }: { player: LivePlayer; timers: Map<string,
 
 function TrackerButton({
   refKey,
+  icon,
   idleLabel,
   activeLabel,
   kind,
@@ -285,6 +377,7 @@ function TrackerButton({
   activeClass,
 }: {
   refKey: string;
+  icon: ReactNode;
   idleLabel: string;
   activeLabel: string;
   kind: 'FLASH' | 'ULT';
@@ -300,17 +393,17 @@ function TrackerButton({
   if (remaining !== null) {
     return (
       <button className={`btn-ghost ${activeClass}`} onClick={() => cancelTimer(refKey)} title="Re-clic pour annuler">
-        {activeLabel} ▸ {formatClock(remaining)}
+        {icon} {activeLabel && `${activeLabel} `}{formatClock(remaining)}
       </button>
     );
   }
   return (
     <button
       className="btn-ghost"
-      onClick={() => startTimer(kind, refKey, activeLabel, durationSec * 1000)}
+      onClick={() => startTimer(kind, refKey, kind === 'FLASH' ? 'Flash' : 'R', durationSec * 1000)}
       title={`Démarre ${formatClock(durationSec)}`}
     >
-      {idleLabel}
+      {icon} {idleLabel}
     </button>
   );
 }
@@ -331,11 +424,29 @@ function ObjectiveInset({ timers }: { timers: Map<string, TrackerTimer> }) {
         {OBJECTIVES.map((obj) => {
           const refKey = `obj:${obj.id}`;
           const timer = timers.get(refKey);
-          const remaining = timer ? Math.max(0, timer.expiresAt - (now + clockOffset)) / 1000 : null;
-          if (remaining !== null) {
+          const rem = timer ? Math.max(0, timer.expiresAt - (now + clockOffset)) / 1000 : null;
+          const icon = (
+            <ImgChain
+              srcs={campIconSrcs(obj.id)}
+              style={{ width: 18, height: 18, borderRadius: 4, display: 'block' }}
+              fallback={
+                <span
+                  style={{
+                    width: 9,
+                    height: 9,
+                    borderRadius: 2,
+                    transform: 'rotate(45deg)',
+                    background: 'var(--orange-bar)',
+                    display: 'inline-block',
+                  }}
+                />
+              }
+            />
+          );
+          if (rem !== null) {
             return (
               <button key={obj.id} className="btn-ghost is-ad" onClick={() => cancelTimer(refKey)}>
-                {obj.short} ▸ {formatClock(remaining)}
+                {icon} {formatClock(rem)}
                 {timer?.auto && <span style={{ opacity: 0.65, fontSize: 10 }}>AUTO</span>}
               </button>
             );
@@ -346,7 +457,7 @@ function ObjectiveInset({ timers }: { timers: Map<string, TrackerTimer> }) {
               className="btn-ghost"
               onClick={() => startTimer('OBJECTIVE', refKey, obj.short, obj.respawnSec * 1000)}
             >
-              {obj.short} {formatClock(obj.respawnSec)}
+              {icon} {obj.short} {formatClock(obj.respawnSec)}
             </button>
           );
         })}
@@ -355,7 +466,7 @@ function ObjectiveInset({ timers }: { timers: Map<string, TrackerTimer> }) {
   );
 }
 
-/* ============ feed d'événements ============ */
+/* ============ fil des événements ============ */
 
 const TAG_STYLE: Record<string, string> = {
   KILL: 'ok',

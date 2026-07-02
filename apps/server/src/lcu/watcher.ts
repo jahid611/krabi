@@ -222,13 +222,18 @@ export class LcuWatcher {
     } catch { /* pas de stats classées */ }
 
     try {
+      // on remonte plus loin dans l'historique pour trouver 5 parties CLASSÉES
+      // (420 = solo/duo, 440 = flexible) — les normales/ARAM sont ignorées
       const history = await this.client.get<{
-        games?: { games?: Array<{ participants?: Array<{ stats?: { win?: boolean } }> }> };
-      }>(`/lol-match-history/v1/products/lol/${puuid}/matches?begIndex=0&endIndex=5`);
-      const games = history.games?.games ?? [];
+        games?: { games?: Array<{ queueId?: number; participants?: Array<{ stats?: { win?: boolean } }> }> };
+      }>(`/lol-match-history/v1/products/lol/${puuid}/matches?begIndex=0&endIndex=30`);
+      const games = (history.games?.games ?? []).filter(
+        (g) => g.queueId === 420 || g.queueId === 440,
+      );
       const results = games
         .map((g) => g.participants?.[0]?.stats?.win)
-        .filter((w): w is boolean => typeof w === 'boolean');
+        .filter((w): w is boolean => typeof w === 'boolean')
+        .slice(0, 5);
       if (results.length > 0) {
         entry.form = {
           results,
